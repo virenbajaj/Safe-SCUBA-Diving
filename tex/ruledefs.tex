@@ -1,0 +1,883 @@
+% List all stored rule names with:
+% sed -n "s/.*Store\[\([a-zA-Z]*\)\|.*/\1/p" ruledefs.tex > rules
+% Check occurrence of a corresponding store
+% for line in `cat rules` ; do echo Rule $line ; grep inferenceRuleQuoteDef\{$line\} ??-*.tex | sed "s/ *//g" ; done
+
+\providecommand{\axkey}[1]{\textcolor{vblue}{#1}}%
+%%
+%% List of inference rule and axiom definitions
+%% Recall them using \cinferenceRuleQuote{label}
+%% Andre Platzer.  A complete uniform substitution calculus for differential dynamic logic.  Journal of Automated Reasoning, 2017.
+%% Notation from
+%% Andre Platzer. Logical Foundations of Cyber-Physical Systems. Springer, 2018.
+%%
+%%
+\cinferenceRuleStore[diamond|$\didia{\cdot}$]{diamond axiom}
+{\linferenceRule[equiv]
+  {\lnot\dbox{\ausprg}{\lnot \ausfml}}
+  {\axkey{\ddiamond{\ausprg}{\ausfml}}}
+}
+{}
+\cinferenceRuleStore[diamondax|$\didia{\cdot}$]{diamond axiom}
+{\linferenceRule[equiv]
+  {\lnot\dbox{\ausprgax}{\lnot \ausfmlax}}
+  {\axkey{\ddiamond{\ausprgax}{\ausfmlax}}}
+}
+{}
+\cinferenceRuleStore[assignb|$\dibox{:=}$]{assignment / substitution axiom}
+{\linferenceRule[equiv]
+  {p(\genDJ{x})}
+  {\axkey{\dbox{\pupdate{\umod{x}{\genDJ{x}}}}{p(x)}}}
+}
+{}%{$genDJ{x}$ free for $x$ in $\ausfml$}
+\cinferenceRuleStore[assignbax|$\dibox{:=}$]{assignment / substitution axiom}
+{\linferenceRule[equiv]
+  {p(\aconst)}
+  {\axkey{\dbox{\pupdate{\umod{x}{\aconst}}}{p(x)}}}
+}
+{}%{$genDJ{x}$ free for $x$ in $\ausfml$}
+\cinferenceRuleStore[Dassignb|$\dibox{:=}$]{differential assignment}
+{\linferenceRule[equiv]
+{p(\astrm)}
+{\axkey{\dbox{\Dupdate{\Dumod{\D{x}}{\astrm}}}{p(\D{x})}}}
+}
+{}%{$e$ free for $x$ in $\phi$}
+\cinferenceRuleStore[testb|$\dibox{?}$]{test}
+{\linferenceRule[equiv]
+  {(\ivr \limply \ausfml)}
+  {\axkey{\dbox{\ptest{\ivr}}{\ausfml}}}
+}{}%
+\cinferenceRuleStore[testbax|$\dibox{?}$]{test}
+{\linferenceRule[equiv]
+  {(q \limply p)}
+  {\axkey{\dbox{\ptest{q}}{p}}}
+}{}%
+\cinferenceRuleStore[evolveb|$\dibox{'}$]{evolve}
+{\linferenceRule[equiv]
+  {\lforall{t{\geq}0}{\dbox{\pupdate{\pumod{x}{\solf(t)}}}{p(x)}}}
+  {\axkey{\dbox{\pevolve{\D{x}=\genDE{x}}}{p(x)}}}
+}{\m{\D{\solf}(t)=\genDE{\solf}}}%{$t$ is a fresh variable, no x' in p(x) or q(x) and~$\solf$ is the solution of the differential equations with constant symbol~$x$ as symbolic initial values.}
+\cinferenceRuleStore[choiceb|$\dibox{\cup}$]{axiom of nondeterministic choice}
+{\linferenceRule[equiv]
+  {\dbox{\ausprg}{\ausfml} \land \dbox{\busprg}{\ausfml}}
+  {\axkey{\dbox{\pchoice{\ausprg}{\busprg}}{\ausfml}}}
+}{}%
+\cinferenceRuleStore[choicebax|$\dibox{\cup}$]{axiom of nondeterministic choice}
+{\linferenceRule[equiv]
+  {\dbox{\ausprgax}{\ausfmlax} \land \dbox{\busprgax}{\ausfmlax}}
+  {\axkey{\dbox{\pchoice{\ausprgax}{\busprgax}}{\ausfmlax}}}
+}{}%
+\cinferenceRuleStore[evolveinb|$\dibox{'}$]{evolve}
+{\linferenceRule[equiv]
+  {
+        \lforall{t{\geq}0}{\big(
+          (\lforall{0{\leq}s{\leq}t}{q(\solf(s))})
+          \limply
+          \dbox{\pupdate{\pumod{x}{\solf(t)}}}{p(x)}
+        \big)}
+      }
+  {
+        \dbox{\pevolvein{\D{x}=\genDE{x}}{q(x)}}{p(x)}
+  }
+}{}%{$t$ is a fresh variable, no x' in p(x) or q(x)}
+\cinferenceRuleStore[composeb|$\dibox{{;}}$]{composition} %``One step at a time axiom''
+{\linferenceRule[equiv]
+  {\dbox{\ausprg}{\dbox{\busprg}{\ausfml}}}
+  {\axkey{\dbox{\ausprg;\busprg}{\ausfml}}}
+}{}%
+\cinferenceRuleStore[composebax|$\dibox{{;}}$]{composition} %``One step at a time axiom''
+{\linferenceRule[equiv]
+  {\dbox{\ausprgax}{\dbox{\busprgax}{\ausfmlax}}}
+  {\axkey{\dbox{\ausprgax;\busprgax}{\ausfmlax}}}
+}{}%
+\cinferenceRuleStore[iterateb|$\dibox{{}^*}$]{iteration/repeat unwind} %|$\dibox{{}^{*n}}$
+{\linferenceRule[equiv]
+  {\ausfml \land \dbox{\ausprg}{\dbox{\prepeat{\ausprg}}{\ausfml}}}
+  {\axkey{\dbox{\prepeat{\ausprg}}{\ausfml}}}
+}{}%
+\cinferenceRuleStore[iteratebax|$\dibox{{}^*}$]{iteration/repeat unwind} %|$\dibox{{}^{*n}}$
+{\linferenceRule[equiv]
+  {\ausfmlax \land \dbox{\ausprgax}{\dbox{\prepeat{\ausprgax}}{\ausfmlax}}}
+  {\axkey{\dbox{\prepeat{\ausprgax}}{\ausfmlax}}}
+}{}%
+%NOTE \irref{iterateb} is unnecessary for completeness
+\cinferenceRuleStore[K|K]{K axiom / modal modus ponens}
+{\linferenceRule[impl]
+  {\dbox{\ausprg}{(\ausfml\limply\busfml)}}
+  {(\dbox{\ausprg}{\ausfml}\limply\axkey{\dbox{\ausprg}{\busfml}})}
+}{}%
+\cinferenceRuleStore[Kax|K]{K axiom / modal modus ponens}
+{\linferenceRule[impl]
+  {\dbox{\ausprgax}{(\ausfmlax\limply\busfmlax)}}
+  {(\dbox{\ausprgax}{\ausfmlax}\limply\axkey{\dbox{\ausprgax}{\busfmlax}})}
+}{}%
+\cinferenceRuleStore[I|II]{loop induction}
+{\linferenceRule[impl]
+  {\dbox{\prepeat{\ausprg}}{(\ausfml\limply\dbox{\ausprg}{\ausfml})}}
+  {(\ausfml\limply\axkey{\dbox{\prepeat{\ausprg}}{\ausfml}})}
+}{}%
+\cinferenceRuleStore[Ieq|I]{loop induction}
+{\linferenceRule[equiv]
+  {\ausfml \land \dbox{\prepeat{\ausprg}}{(\ausfml\limply\dbox{\ausprg}{\ausfml})}}
+  {\axkey{\dbox{\prepeat{\ausprg}}{\ausfml}}}
+}{}%
+\cinferenceRuleStore[Ieqax|I]{loop induction}
+{\linferenceRule[equiv]
+  {\ausfmlax \land \dbox{\prepeat{\ausprgax}}{(\ausfmlax\limply\dbox{\ausprgax}{\ausfmlax})}}
+  {\axkey{\dbox{\prepeat{\ausprgax}}{\ausfmlax}}}
+}{}%
+\dinferenceRuleStore[backiterateb|\usebox{\backiterateb}]{backwards iteration/repeat unwind}
+{\linferenceRule[equiv]
+  {\ausfml \land \dbox{\prepeat{\ausprg}}{\dbox{\ausprg}{\ausfml}}}
+  {\axkey{\dbox{\prepeat{\ausprg}}{\ausfml}}}
+}{}%NOTE derives from \irref{Ieq} or \irref{I}. Unsound in hybrid games
+%%      \cinferenceRule[C|C]{loop convergence}
+%%      {\linferenceRule[impll]
+%%        {\dbox{\prepeat{\ausprg}}{\lforall{v{>}0}{(\mapply{\var}{v}\limply\ddiamond{\ausprg}{\mapply{\var}{v-1}})}}}
+%%        {\lforall{v}{(\mapply{\var}{v} \limply
+%%            \ddiamond{\prepeat{\ausprg}}{\lexists{v{\leq}0}{\mapply{\var}{v}}})}}
+%%      }{\m{v\not\in\ausprg}}%{Logical variable~$v$ does not occur in~$\ausprg$.}
+%%      \cinferenceRule[B|B]{Barcan$\dbox{}{}\forall{}$} %|$\dibox{}\forall$
+%%      {\linferenceRule[impl]
+%%        {\lforall{x}{\dbox{\ausprg}{\ausfml}}}
+%%        {\dbox{\ausprg}{\lforall{x}{\ausfml}}}
+%%      }{\m{x\not\in\ausprg}}
+\dinferenceRuleStore[iterateiterateb|$\dibox{{}^*{}^*}$]{double iteration}
+{\linferenceRule[equiv]
+  {\dbox{\prepeat{\ausprg}}{\ausfml}}
+  {\axkey{\dbox{\prepeat{\ausprg};\prepeat{\ausprg}}{\ausfml}}}
+}{}%NOTE derives
+\dinferenceRuleStore[iterateiterated|$\didia{{}^*{}^*}$]{double iteration}
+{\linferenceRule[equiv]
+  {\ddiamond{\prepeat{\ausprg}}{\ausfml}}
+  {\axkey{\ddiamond{\prepeat{\ausprg};\prepeat{\ausprg}}{\ausfml}}}
+}{}%NOTE derives
+\cinferenceRuleStore[B|B]{Barcan and converse}
+{\linferenceRule[equiv]
+        {\ddiamond{\ausprg}{\lexists{x}{\ausfml}}}
+        {\lexists{x}{\ddiamond{\ausprg}{\ausfml}}}
+}{\m{x{\not\in}\ausprg}}
+\cinferenceRuleStore[V|V]{vacuous $\dbox{}{}$}
+{\linferenceRule[impl]
+  {p}
+  {\axkey{\dbox{\ausprg}{p}}}
+}{\m{FV(p)\cap BV(\ausprg)=\emptyset}}%{no free variable of $p$ is bound by $\ausprg$}
+\cinferenceRuleStore[Vax|V]{vacuous $\dbox{}{}$}
+{\linferenceRule[impl]
+  {p}
+  {\axkey{\dbox{a}{p}}}
+}{}%{no free variable of $p$ is bound by $a$}
+\cinferenceRuleStore[G|G]{$\dbox{}{}$ generalization} %|$gen$
+{\linferenceRule[formula]
+  {\ausfml}
+  {\dbox{\ausprg}{\ausfml}}
+}{}%
+\cinferenceRuleStore[Gax|G]{$\dbox{}{}$ generalization} %|$gen$
+{\linferenceRule[formula]
+  {\ausfmlax}
+  {\dbox{\ausprgax}{\ausfmlax}}
+}{}%
+%%      \cinferenceRule[MP|MP]{modus ponens}
+%%      {\linferenceRule[formula]
+%%        {\ausfml\limply\busfml \quad \ausfml}
+%%        {\busfml}
+%%      }{}%\internal{assumed part of the Hilbert base calculus or derivable from other quantifier rules \cite{DBLP:journals/jar/Platzer08}}
+%%      \cinferenceRule[gena|$\forall$]{$\forall{}$ generalization}
+%%      {\linferenceRule[formula]
+%%        {\ausfml}
+%%        {\lforall{x}{\ausfml}}
+%%      }{}%\internal{assumed part of the Hilbert base calculus or derivable from other quantifier rules \cite{DBLP:journals/jar/Platzer08}}
+%%%      %\internal{presence implies consequence global w.r.t.\ states or universal closure}%
+\cinferenceRuleStore[genaax|$\forall{}$]{$\forall{}$ generalisation}
+{\linferenceRule[formula]
+  {p(x)}
+  {\lforall{x}{p(x)}}
+}{}%\internal{assumed part of the Hilbert base calculus or derivable from other quantifier rules \cite{DBLP:journals/jar/Platzer08}}
+      % NOTE Skolemization could follow from this by importing all context into p(x), thus renaming variables along the way as needed, then in the premise x will be unique for p(x) not in the rest q.
+      %\internal{presence implies consequence global w.r.t.\ states or universal closure}%
+\cinferenceRuleStore[MPax|MP]{modus ponens}
+{\linferenceRule[formula]
+  {p\limply q \quad p}
+  {q}
+}{}%\internal{assumed part of the Hilbert base calculus or derivable from other quantifier rules \cite{DBLP:journals/jar/Platzer08}}
+\cinferenceRuleStore[Mb|M${\dibox{\cdot}}$]{$\dbox{}{}$ monotone}
+{\linferenceRule[formula]
+  {\ausfml\limply \busfml}
+  {\dbox{\ausprg}{\ausfml}\limply\dbox{\ausprg}{\busfml}}
+}{}%
+\cinferenceRuleStore[M|M]{$\ddiamond{}{}$ monotone / $\ddiamond{}{}$-generalization}
+{\linferenceRule[formula]
+  {\ausfml\limply\busfml}
+  {\ddiamond{\ausprg}{\ausfml}\limply\ddiamond{\ausprg}{\busfml}}
+}{}%
+
+\dinferenceRuleStore[Mbr|M\rightrule]%[M$_{\dibox{\cdot}}$\rightrule]
+{$\ddiamond{}{}/\dbox{}{}$ generalization=M=G+K} 
+{\linferenceRule[sequent]
+  {\lsequent[L]{} {\dbox{\ausprg}{\busfml}} 
+  &\lsequent[g]{\busfml} {\ausfml}}
+  {\lsequent[L]{} {\dbox{\ausprg}{\ausfml}}}
+}{}%
+
+\dinferenceRuleStore[loop|loop]{inductive invariant}
+{\linferenceRule[sequent]
+  {\lsequent[L]{} {\inv}
+  &\lsequent[g]{\inv} {\dbox{\ausprg}{\inv}}
+  &\lsequent[g]{\inv} {\ausfml}}
+  {\lsequent[L]{} {\dbox{\prepeat{\ausprg}}{\ausfml}}}
+}{}%
+\dinferenceRuleStore[invind|ind]{inductive invariant}
+{\linferenceRule[sequent]
+  {\lsequent[\globalrule]{\ausfml}{\dbox{\ausprg}{\ausfml}}}
+  {\lsequent{\ausfml}{\dbox{\prepeat{\ausprg}}{\ausfml}}}
+}{}%
+\cinferenceRuleStore[con|con]{loop convergence right} %|$con$
+{\linferenceRule[formula]
+  {\lsequent[G]{\mapply{\var}{v}\land v>0}{\ddiamond{\ausprg}{\mapply{\var}{v-1}}}}
+  {\lsequent[L]{\lexists{v}{\mapply{\var}{v}}}
+      {\axkey{\ddiamond{\prepeat{\ausprg}}{\lexists{v{\leq}0}{\mapply{\var}{v}}}}}}
+%        {\lexists{v}{\mapply{\var}{v}} \limply
+%            \ddiamond{\prepeat{\ausprg}}{\lexists{v{\leq}0}{\mapply{\var}{v}}}}
+}{v\not\in\ausprg}%{Logical variable~$v$ does not occur in~$\ausprg$.}
+\dinferenceRuleStore[congen|con]{loop convergence}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{\lexists{v}{\mapply{\var}{v}}}
+  &\lsequent[G]{}{\lforall{v{>}0}{({\mapply{\var}{v}}\limply{\ddiamond{\ausprg}{\mapply{\var}{v-1}})}}}
+  &\lsequent[G]{\lexists{v{\leq}0}{\mapply{\var}{v}}}{\busfml}
+  }
+  {\lsequent[L]{}{\ddiamond{\prepeat{\ausprg}}{\busfml}}}
+}{v\not\in\ausprg}
+
+
+% derived
+\dinferenceRuleStore[band|${[]\land}$]{$\dbox{\cdot}{\land}$}
+{\linferenceRule[equiv]
+  {\dbox{\ausprg}{\ausfml} \land \dbox{\ausprg}{\busfml}}
+  {\axkey{\dbox{\ausprg}{(\ausfml\land\busfml)}}}
+}{}%
+
+\dinferenceRuleStore[Hoarecompose|H${;}$]{Hoare $;$}
+{\linferenceRule
+  {A\limply\dbox{\ausprg}{E} & E\limply\dbox{\busprg}{B}}
+  {A \limply \dbox{\ausprg;\busprg}{B}}
+}{}%
+\dinferenceRuleStore[composebrexplicit|$\dibox{{;}}$\rightrule]{$;$}
+{\linferenceRule
+  {A\limply\dbox{\ausprg}{\dbox{\busprg}{B}}}
+  {A \limply \dbox{\ausprg;\busprg}{B}}
+}{}
+
+
+%% propositional
+
+\cinferenceRuleStore[notr|$\lnot$\rightrule]{$\lnot$ right}
+{\linferenceRule[sequent]
+  {\lsequent[L]{\asfml}{}}
+  {\lsequent[L]{}{\lnot \asfml}}
+}{}%
+\cinferenceRuleStore[notl|$\lnot$\leftrule]{$\lnot$ left}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{\asfml}}
+  {\lsequent[L]{\lnot \asfml}{}}
+}{}%
+\cinferenceRuleStore[andr|$\land$\rightrule]{$\land$ right}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{\asfml}
+    & \lsequent[L]{}{\bsfml}}
+  {\lsequent[L]{}{\asfml \land \bsfml}}
+}{}%
+\cinferenceRuleStore[andl|$\land$\leftrule]{$\land$ left}
+{\linferenceRule[sequent]
+  {\lsequent[L]{\asfml , \bsfml}{}}
+  {\lsequent[L]{\asfml \land \bsfml}{}}
+}{}%
+\cinferenceRuleStore[orr|$\lor$\rightrule]{$\lor$ right}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{\asfml, \bsfml}}
+  {\lsequent[L]{}{\asfml \lor \bsfml}}
+}{}%
+\cinferenceRuleStore[orl|$\lor$\leftrule]{$\lor$ left}
+{\linferenceRule[sequent]
+  {\lsequent[L]{\asfml}{}
+    & \lsequent[L]{\bsfml}{}}
+  {\lsequent[L]{\asfml \lor \bsfml}{}}
+}{}%
+\cinferenceRuleStore[implyr|$\limply$\rightrule]{$\limply$ right}
+{\linferenceRule[sequent]
+  {\lsequent[L]{\asfml}{\bsfml}}
+  {\lsequent[L]{}{\asfml \limply \bsfml}}
+}{}%
+\cinferenceRuleStore[implyl|$\limply$\leftrule]{$\limply$ left}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{\asfml}
+    & \lsequent[L]{\bsfml}{}}
+  {\lsequent[L]{\asfml \limply \bsfml}{}}
+}{}%
+\cinferenceRuleStore[equivr|$\lbisubjunct$\rightrule]{$\lbisubjunct$ right}
+{\linferenceRule[sequent]
+  {\lsequent[L]{\asfml}{\bsfml}
+   & \lsequent[L]{\bsfml}{\asfml}}
+  {\lsequent[L]{}{\asfml \lbisubjunct \bsfml}}
+}{}%
+\cinferenceRuleStore[equivl|$\lbisubjunct$\leftrule]{$\lbisubjunct$ left}
+{\linferenceRule[sequent]
+  {\lsequent[L]{\asfml\limply\bsfml, \bsfml\limply\asfml}{}}
+  {\lsequent[L]{\asfml \lbisubjunct \bsfml}{}}
+}{}%
+\cinferenceRuleStore[id|id]{identity}
+{\linferenceRule[sequent]
+  {}
+  {\lsequent[L]{\asfml}{\asfml}}
+}{}%
+\cinferenceRuleStore[cut|cut]{cut}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{\cusfml}
+  &\lsequent[L]{\cusfml}{}}
+  {\lsequent[L]{}{}}
+}{}%
+\cinferenceRuleStore[weakenr|W\rightrule]{weakening right}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{}}
+  {\lsequent[L]{}{\asfml}}
+}{}%
+\cinferenceRuleStore[weakenl|W\leftrule]{weakening left}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{}}
+  {\lsequent[L]{\asfml}{}}
+}{}%
+\cinferenceRuleStore[exchanger|P\rightrule]{exchange right}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{\bsfml,\asfml}}
+  {\lsequent[L]{}{\asfml,\bsfml}}
+}{}%
+\cinferenceRuleStore[exchangel|P\leftrule]{exchange left}
+{\linferenceRule[sequent]
+  {\lsequent[L]{\bsfml,\asfml}{}}
+  {\lsequent[L]{\asfml,\bsfml}{}}
+}{}%
+\cinferenceRuleStore[contractr|c\rightrule]{contract right}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{\asfml,\asfml}}
+  {\lsequent[L]{}{\asfml}}
+}{}%
+\cinferenceRuleStore[contractl|c\leftrule]{contract left}
+{\linferenceRule[sequent]
+  {\lsequent[L]{\asfml,\asfml}{}}
+  {\lsequent[L]{\asfml}{}}
+}{}
+\cinferenceRuleStore[closeTrue|$\top$\rightrule]{close by true}
+{\linferenceRule[sequent]
+  {}
+  {\lsequent[L]{}{\ltrue}}
+}{}%
+\cinferenceRuleStore[closeFalse|$\bot$\leftrule]{close by false}
+{\linferenceRule[sequent]
+  {}
+  {\lsequent[L]{\lfalse}{}}
+}{}%
+
+\cinferenceRuleStore[CE|CE]{congequiv congruence of equivalences on formulas}
+{\linferenceRule[formula]
+  {\ausfml \lbisubjunct \busfml}
+  {\contextapp{C}{\ausfml} \lbisubjunct \contextapp{C}{\busfml}}
+}{}%
+\dinferenceRuleStore[CEr|CE\rightrule]{congequiv congruence of equivalences on formulas}
+{\linferenceRule[formula]
+  {\lsequent[L]{} {\contextapp{C}{\busfml}}
+  &\lsequent[g]{} {\ausfml \lbisubjunct \busfml}}
+  {\lsequent[L]{} {\contextapp{C}{\ausfml}}}
+}{}%
+\dinferenceRuleStore[CEl|CE\leftrule]{congequiv congruence of equivalences on formulas}
+{\linferenceRule[formula]
+  {\lsequent[L]{\contextapp{C}{\busfml}} {}
+  &\lsequent[g]{} {\ausfml \lbisubjunct \busfml}}
+  {\lsequent[L]{\contextapp{C}{\ausfml}} {}}
+}{}%
+
+% quantifiers
+\cinferenceRuleStore[allr|$\forall$\rightrule]{$\lforall{}{}$ right}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{p(y)}}
+  {\lsequent[L]{}{\lforall{x}{p(x)}}}
+}{\m{y\not\in\Gamma{,}\Delta{,}\lforall{x}{p(x)}}}%
+\cinferenceRuleStore[alll|$\forall$\leftrule]{$\lforall{}{}$ left instantiation}
+{\linferenceRule[sequent]
+  {\lsequent[L]{p(\astrm)}{}}
+  {\lsequent[L]{\lforall{x}{p(x)}}{}}
+}{arbitrary term $\astrm$}%{$\astrm$ is an arbitrary term}
+%\irlabel{alllinst|$\forall$\leftrule}
+\cinferenceRuleStore[existsr|$\exists$\rightrule]{$\lexists{}{}$ right}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{p(\astrm)}}
+  {\lsequent[L]{}{\lexists{x}{p(x)}}}
+}{arbitrary term $\astrm$}%{$\astrm$ is an arbitrary term}
+%\irlabel{existsrinst|$\exists$\rightrule}
+\cinferenceRuleStore[existsl|$\exists$\leftrule]{$\lexists{}{}$ left}
+{\linferenceRule[sequent]
+  {\lsequent[L]{p(y)} {}}
+  {\lsequent[L]{\lexists{x}{p(x)}} {}}
+}{\m{y\not\in\Gamma{,}\Delta{,}\lexists{x}{p(x)}}}%
+
+\cinferenceRuleStore[qear|\usebox{\Rval}]{quantifier elimination real arithmetic}
+{\linferenceRule[sequent]
+  {}
+  {\lsequent[g]{\Gamma}{\Delta}}
+}{\text{if}~\landfold_{\ausfml\in\Gamma} \ausfml \limply \lorfold_{\busfml\in\Delta} \busfml ~\text{is valid in \LOS[\reals]}}%
+
+\dinferenceRuleStore[allGi|i$\forall$]{inverse universal generalization / universal instantiation}
+{\linferenceRule[sequent]
+  {\lsequent[L]{} {\lforall{x}{\ausfml}}}
+  {\lsequent[L]{} {\ausfml}}
+}{}%{same as \irref{allInst}}
+
+
+\cinferenceRuleStore[applyeqr|=\rightrule]{apply equation}
+{\linferenceRule[sequent]
+  {\lsequent[L]{x=\astrm}{p(\astrm)}}
+  {\lsequent[L]{x=\astrm}{p(x)}}
+}{}%
+\cinferenceRuleStore[applyeql|=\leftrule]{apply equation}
+{\linferenceRule[sequent]
+  {\lsequent[L]{x=\astrm,p(\astrm)}{}}
+  {\lsequent[L]{x=\astrm,p(x)}{}}
+}{}%
+
+%% 06-truth.tex additional axioms
+\dinferenceRuleStore[alldupl|$\forall\forall$\leftrule]{$\lforall{}{}$ left instantiation retaining duplicates}
+{\linferenceRule[sequent]
+  {\lsequent[L]{\lforall{x}{p(x)},p(\astrm)}{}}
+  {\lsequent[L]{\lforall{x}{p(x)}}{}}
+}{}%{$\astrm$ is an arbitrary term}
+%\irlabel{alllinst|$\forall$\leftrule}
+
+\dinferenceRuleStore[choicebrinsist|$\dibox{\cup}\rightrule$]{}
+{\linferenceRule
+  {\lsequent[L]{}{\dbox{\asprg}{\ausfml}\land\dbox{\bsprg}{\ausfml}}}
+  {\lsequent[L]{}{\dbox{\pchoice{\asprg}{\bsprg}}{\ausfml}}}
+}{}
+\dinferenceRuleStore[choiceblinsist|$\dibox{\cup}\leftrule$]{}
+{\linferenceRule
+  {\lsequent[L]{\dbox{\asprg}{\ausfml}\land\dbox{\bsprg}{\ausfml}}{}}
+  {\lsequent[L]{\dbox{\pchoice{\asprg}{\bsprg}}{\ausfml}}{}}
+}{}
+\dinferenceRuleStore[choicebrinsist2|$\dibox{\cup}\rightrule2$]{}
+{\linferenceRule
+  {\lsequent[L]{}{\dbox{\asprg}{\ausfml}}
+  &\lsequent[L]{}{\dbox{\bsprg}{\ausfml}}}
+  {\lsequent[L]{}{\dbox{\pchoice{\asprg}{\bsprg}}{\ausfml}}}
+}{}
+\dinferenceRuleStore[choiceblinsist2|$\dibox{\cup}\leftrule2$]{}
+{\linferenceRule
+  {\lsequent[L]{\dbox{\asprg}{\ausfml},\dbox{\bsprg}{\ausfml}}{}}
+  {\lsequent[L]{\dbox{\pchoice{\asprg}{\bsprg}}{\ausfml}}{}}
+}{}
+\dinferenceRuleStore[cutr|cut\rightrule]{cut right}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{\bsfml}
+  &\lsequent[L]{}{\bsfml\limply\asfml}}
+  {\lsequent[L]{}{\asfml}}
+}{}
+\dinferenceRuleStore[cutl|cut\leftrule]{cut left}
+{\linferenceRule[sequent]
+  {\lsequent[L]{\bsfml} {}
+  &\lsequent[L]{}{\asfml\limply\bsfml}}
+  {\lsequent[L]{\asfml} {}}
+}{}
+
+
+%% 10-diffinv.tex
+
+\cinferenceRuleStore[Dplus|$+'$]{derive sum}
+{\linferenceRule[eq]
+  {\der{\asdtrm}+\der{\bsdtrm}}
+  {\axkey{\der{\asdtrm+\bsdtrm}}}
+}
+{}
+\cinferenceRuleStore[Dplusax|$+'$]{derive sum}
+{\linferenceRule[eq]
+  {\der{\asdtrmax}+\der{\bsdtrmax}}
+  {\axkey{\der{\asdtrmax+\bsdtrmax}}}
+}
+{}
+\cinferenceRuleStore[Dminus|$-'$]{derive minus}
+{\linferenceRule[eq]
+  {\der{\asdtrm}-\der{\bsdtrm}}
+  {\axkey{\der{\asdtrm-\bsdtrm}}}
+}
+{}
+\cinferenceRuleStore[Dminusax|$-'$]{derive minus}
+{\linferenceRule[eq]
+  {\der{\asdtrmax}-\der{\bsdtrmax}}
+  {\axkey{\der{\asdtrmax-\bsdtrmax}}}
+}
+{}
+\cinferenceRuleStore[Dtimes|$\cdot'$]{derive product}
+{\linferenceRule[eq]
+  {\der{\asdtrm}\cdot \bsdtrm+\asdtrm\cdot\der{\bsdtrm}}
+  {\axkey{\der{\asdtrm\cdot \bsdtrm}}}
+}
+{}
+\cinferenceRuleStore[Dtimesax|$\cdot'$]{derive product}
+{\linferenceRule[eq]
+  {\der{\asdtrmax}\cdot \bsdtrmax+\asdtrmax\cdot\der{\bsdtrmax}}
+  {\axkey{\der{\asdtrmax\cdot \bsdtrmax}}}
+}
+{}
+\cinferenceRuleStore[Dquotient|$/'$]{derive quotient}
+{\linferenceRule[eq]
+  {\big(\der{\asdtrm}\cdot \bsdtrm-\asdtrm\cdot\der{\bsdtrm}\big) / \bsdtrm^2}
+  {\axkey{\der{\asdtrm/\bsdtrm}}}
+}
+{}
+\cinferenceRuleStore[Dquotientax|$/'$]{derive quotient}
+{\linferenceRule[eq]
+  {\big(\der{\asdtrmax}\cdot \bsdtrmax-\asdtrmax\cdot\der{\bsdtrmax}\big) / \bsdtrmax^2}
+  {\axkey{\der{\asdtrmax/\bsdtrmax}}}
+}
+{}
+\cinferenceRuleStore[Dconst|$c'$]{derive constant}
+{\linferenceRule[eq]
+  {0}
+  {\axkey{\der{\aconst}}}
+  \hspace{3cm}
+}
+{\text{for numbers or constants~$\aconst$}}%{for $\allvars\cup\D{\allvars}\not\in g(x)$}
+\cinferenceRuleStore[Dvar|$x'$]{derive variable}
+{\linferenceRule[eq]
+  {\D{x}}
+  {\axkey{\der{x}}}
+}
+{\text{for variable~$x\in\allvars$}}%{for $x\in\allvars$}
+
+\cinferenceRuleStore[DE|DE]{differential effect} %diffeffect
+{\linferenceRule[viuqe]
+  {\axkey{\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\ausfml}}}
+  {\dbox{\pevolvein{\D{x}=f(x)}{\ivr}}{\dbox{\axeffect{\Dupdate{\Dumod{\D{x}}{\genDE{x}}}}}{\ausfml}}}
+}
+{}%
+\cinferenceRuleStore[DEax|DE]{differential effect} %diffeffect
+{\linferenceRule[viuqe]
+  {\axkey{\dbox{\pevolvein{\D{x}=\genDE{x}}{q(x)}}{\ausfmlax}}}
+  {\dbox{\pevolvein{\D{x}=f(x)}{q(x)}}{\dbox{\axeffect{\Dupdate{\Dumod{\D{x}}{\genDE{x}}}}}{\ausfmlax}}}
+}
+{}%
+
+%% 11-diffcut.tex
+
+\cinferenceRuleStore[Dand|${\land}'$]{derive and}
+{\linferenceRule[equiv]
+  {\der{\asfml}\land\der{\bsfml}}
+  {\axkey{\der{\asfml\land\bsfml}}}
+}
+{}
+\cinferenceRuleStore[Dor|${\lor}'$]{derive or}
+{\linferenceRule[equiv]
+  {\der{\asfml}\land\der{\bsfml}}
+  {\axkey{\der{\asfml\lor\bsfml}}}
+}
+{}
+\cinferenceRuleStore[diffweaken|DW]{differential evolution domain} %diffevo
+{\linferenceRule[viuqe]
+  {\axkey{\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\ousfml[x]}}}
+  {\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{(\axeffect{\ivr}\limply \ousfml[x])}}
+}
+{}%{derives from \irref{DW+K+G}}.
+\cinferenceRuleStore[diffweakenax|DW]{differential evolution domain} %diffevo
+{\linferenceRule[viuqe]
+  {\axkey{\dbox{\pevolvein{\D{x}=\genDE{x}}{q(x)}}{p(x)}}}
+  {\dbox{\pevolvein{\D{x}=\genDE{x}}{q(x)}}{(\axeffect{q(x)}\limply p(x))}}
+}
+{}%{derives from \irref{DW+K+G}}.
+\cinferenceRuleStore[dW|dW]{differential weakening}
+{\linferenceRule[sequent]
+  {\lsequent[g]{\ivr} {\ousfml[x]}}
+  {\lsequent[g]{\Gamma} {\dbox{\pevolvein{\D{x}=f(x)}{\ivr}}{\ousfml[x]},\Delta}}
+}
+{}%{if $\constpart{\Gamma},\constpart{\Delta}$ kept then no x' in p(x) nor q(x), derives from \irref{DW+K+G}}.
+\cinferenceRuleStore[DI|DI]{differential induction}
+{\linferenceRule[lpmi]
+  {\big(\axkey{\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\ousfml[x]}}
+  \lbisubjunct \dbox{\ptest{\ivr}}{\ousfml[x]}\big)}
+  {(\ivr\limply\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\axeffect{\der{\ousfml[x]}}})}
+}
+{}%{no x' in \ousfml[x] as no higher-order differential symbols \D[2]{x} are allowed}
+\cinferenceRuleStore[DIax|DI]{differential induction}
+{\linferenceRule[lpmi]
+  {\big(\axkey{\dbox{\pevolvein{\D{x}=\genDE{x}}{q(x)}}{p(x)}}
+  \lbisubjunct \dbox{\ptest{q(x)}}{p(x)}\big)}
+  {(q(x)\limply\dbox{\pevolvein{\D{x}=\genDE{x}}{q(x)}}{\axeffect{\der{p(x)}}})}
+}
+{}%{no x' in \ousfml[x] as no higher-order differential symbols \D[2]{x} are allowed}
+\cinferenceRuleStore[DIlight|DI]{differential induction}
+{\linferenceRule[lpmi]
+  {\big(\axkey{\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\ousfml[x]}}
+  \lbisubjunct \dbox{\ptest{\ivr}}{\ousfml[x]}\big)}
+  {\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr})}{\axeffect{\der{\ousfml[x]}}}}
+}
+{}%{no x' in \ousfml[x] as no higher-order differential symbols \D[2]{x} are allowed}
+
+\cinferenceRuleStore[dI|dI]{differential invariant}%[diffind]
+{\linferenceRule[sequent]
+  {\lsequent[g]{\ivr}{\Dusubst{\D{x}}{\genDE{x}}{\der{F}}}}
+  {\lsequent{F}{\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{F}}}
+}{}
+\cinferenceRuleStore[DC|DC]{differential cut}
+{\linferenceRule[lpmi]
+  {\big(\axkey{\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\ousfml[x]}} \lbisubjunct \dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr\land \axeffect{\ousfmlc[x]}}}{\ousfml[x]}\big)}
+  {\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\axeffect{\ousfmlc[x]}}}
+}
+{}%{assumption proved by \irref{G}}
+\cinferenceRuleStore[DCax|DC]{differential cut}
+{\linferenceRule[lpmi]
+  {\big(\axkey{\dbox{\pevolvein{\D{x}=\genDE{x}}{q(x)}}{p(x)}} \lbisubjunct \dbox{\pevolvein{\D{x}=\genDE{x}}{q(x)\land \axeffect{r(x)}}}{p(x)}\big)}
+  {\dbox{\pevolvein{\D{x}=\genDE{x}}{q(x)}}{\axeffect{r(x)}}}
+}
+{}%{assumption proved by \irref{G}}
+\cinferenceRuleStore[dC|dC]{differential cut}%[diffcut]
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\axeffect{\cusfml}}}
+  &\lsequent[L]{}{\dbox{\pevolvein{\D{x}=\genDE{x}}{(\ivr\land \axeffect{\cusfml})}}{\ousfml[x]}}}
+  {\lsequent[L]{}{\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\ousfml[x]}}}
+}{}
+\cinferenceRuleStore[DGanyode|DG]{differential ghost variables (unsound!)}
+{\linferenceRule[viuqe]
+  {\axkey{\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\ousfml[x]}}}
+  {\lexists{y}{\dbox{\pevolvein{\D{x}=\genDE{x}\syssep\axeffect{\D{y}=g(x,y)}}{\ivr}}{\ousfml[x]}}}
+}
+{}
+\cinferenceRuleStore[DG|DG]{differential ghost variables}
+{\linferenceRule[viuqe]
+  {\axkey{\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\ousfml[x]}}}
+  {\lexists{y}{\dbox{\pevolvein{\D{x}=\genDE{x}\syssep\axeffect{\D{y}=a(x)\cdot y+b(x)}}{\ivr}}{\ousfml[x]}}}
+}
+{}
+\cinferenceRuleStore[DGax|DG]{differential ghost variables}
+{\linferenceRule[viuqe]
+  {\axkey{\dbox{\pevolvein{\D{x}=\genDE{x}}{q(x)}}{p(x)}}}
+  {\lexists{y}{\dbox{\pevolvein{\D{x}=\genDE{x}\syssep\axeffect{\D{y}=a(x)\cdot y+b(x)}}{q(x)}}{p(x)}}}
+}
+{}
+\cinferenceRuleStore[dG|dG]{dG}%{differential ghost variables} %diffghost
+{\linferenceRule[sequent]
+  {\lsequent[L]{} {\lexists{y}{\dbox{\pevolvein{\D{x}=f(x)\syssep\axeffect{\D{y}=a(x)\cdot y+b(x)}}{\oivr[x]}}{\ousfml[x]}}}
+  }
+  {\lsequent[L]{} {\dbox{\pevolvein{\D{x}=f(x)}{\oivr[x]}}{\ousfml[x]}}}
+}
+{}%
+
+\dinferenceRuleStore[assignbeqr|$\dibox{:=}_=$]{assignb}%{assignment equational rule}
+  {\linferenceRule[sequent]
+    {\lsequent[L]{y=\austrm} {p(y)}}
+    {\lsequent[L]{} {\dbox{\pupdate{\umod{x}{\austrm}}}{p(x)}}}
+  }
+  {\text{$y$ new}}
+
+
+\cinferenceRuleStore[DSax|DS]{(constant) differential equation solution} %diffsolveb0
+{\linferenceRule[viuqe]
+  {\axkey{\dbox{\pevolvein{\D{x}=\aconst}{q(x)}}{p(x)}}}
+  {\lforall{t{\geq}0}{\big((\lforall{0{\leq}s{\leq}t}{q(x+\aconst\itimes s)}) \limply \dbox{\pupdate{\pumod{x}{x+\aconst\itimes t}}}{p(x)}\big)}}
+  %equivalent: {\lforall{t}{.....\dbox{\pupdate{\pumod{x}{x+ct^2}}}{p(x)}}}
+}
+{}%{}
+
+%% 10-diffinv.tex additions that are not considered much further.
+\dinferenceRuleStore[DIeq0|DI]{differential invariant axiom}
+{\linferenceRule[lpmi]
+  {\big(\axkey{\dbox{\pevolve{\D{x}=\genDE{x}}}{\,\astrm=0}} \lbisubjunct \astrm=0\big)}
+  {\dbox{\pevolve{\D{x}=\genDE{x}}}{\,\axeffect{\der{\astrm}=0}}}
+}
+{}
+\dinferenceRuleStore[diffindeq0|dI]{differential invariant $=0$ case}
+{\linferenceRule[sequent]
+  {\lsequent{~}{\Dusubst{\D{x}}{\genDE{x}}{\der{\astrm}}=0}}
+  {\lsequent{\astrm=0}{\dbox{\pevolve{\D{x}=\genDE{x}}}{\astrm=0}}}
+}{}
+\cinferenceRuleStore[Liec|dI$_c$]{}
+{\linferenceRule
+  {\lsequent{\ivr}{\Dusubst{\D{x}}{\genDE{x}}{\der{\astrm}}=0}}
+  {\lsequent{}{\lforall{c}{\big(\astrm=c \limply \dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\astrm=c}\big)}}}
+}{}
+
+%% 11-diffcut.tex additions that are not considered much further.
+
+\cinferenceRuleStore[DIeq|DI$_=$]{differential induction $=$ case}
+{\linferenceRule[lpmi]
+  {\big(\axkey{\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\asdtrm=\bsdtrm}}
+  \lbisubjunct \dbox{\ptest{\ivr}}{\asdtrm=\bsdtrm}\big)}
+  {\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr})}{\axeffect{\der{\asdtrm}=\der{\bsdtrm}}}}
+}
+{}%{no x' in \ivr or postcondition as no higher-order differential symbols \D[2]{x} are allowed}
+
+\dinferenceRuleStore[diffindgen|dI']{differential invariant}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{\inv}
+  &\lsequent[g]{\ivr}{\Dusubst{\D{x}}{\genDE{x}}{\der{\inv}}}
+  &\lsequent[g]{\inv}{\psi}
+  }
+  {\lsequent[L]{}{\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\psi}}}
+}{}
+\cinferenceRuleStore[diffindunsound|dI$_{??}$]{unsound}
+{\linferenceRule[sequent]
+  {\lsequent{\ivr\land\inv}{\Dusubst{\D{x}}{\genDE{x}}{\der{\inv}}}}
+  {\lsequent{\inv}{\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\inv}}}
+}{}
+
+%% 12-diffghost.tex
+\dinferenceRuleStore[introaux|iG]{introduce discrete ghost variable}
+{\linferenceRule[sequent]
+  {\lsequent[L]{}{\dbox{\axeffect{\pupdate{\pumod{y}{\astrm}}}}{p}}}
+  {\lsequent[L]{} {p}}
+}{\text{$y$ new}}%{\m{y\not\in\freevars{p}}}
+%TODO add [L] to second premise and conclusion for consistency with \irref{dG}?
+\dinferenceRuleStore[diffaux|dA]{differential auxiliary variables}
+{\linferenceRule[sequent]
+  {\lsequent[\globalrule]{}{\inv\lbisubjunct\lexists{y}{G}}
+  &\lsequent{G} {\dbox{\pevolvein{\D{x}=\genDE{x}\syssep\axeffect{\D{y}=a(x)\cdot y+b(x)}}{\ivr}}{G}}}
+  {\lsequent{\inv} {\dbox{\pevolvein{\D{x}=\genDE{x}}{\ivr}}{\inv}}}
+}{}%{$y$ new and \m{\pevolve{\D{y}=g(x,y),y(0)=y_0}} has a solution $y:[0,\infty)\to\reals^n$ for each $y_0$}%{\ignore{where \m{\D{y}=g(x,y)} has a global solution}}
+\cinferenceRuleStore[randomd|$\didia{{:}*}$]{nondeterministic assignment}
+{\linferenceRule[equiv]
+  {\lexists{x}{\ousfml[x]}}
+  {\axkey{\ddiamond{\prandom{x}}{\ousfml[x]}}}
+}{}
+\cinferenceRuleStore[randomb|$\dibox{{:}*}$]{nondeterministic assignment}
+{\linferenceRule[equiv]
+  {\lforall{x}{\ousfml[x]}}
+  {\axkey{\dbox{\prandom{x}}{\ousfml[x]}}}
+}{}
+
+
+%% \rref{ch:gameproofs} but also compatible with hybrid systems
+\cinferenceRuleStore[box|$\dibox{\cdot}$]{box axiom}
+{\linferenceRule[equiv]
+  {\lnot\ddiamond{\ausprg}{\lnot\ausfml}}
+  {\axkey{\dbox{\ausprg}{\ausfml}}}
+}
+{}
+\cinferenceRuleStore[assignd|$\didia{:=}$]{assignment / substitution axiom}
+{\linferenceRule[equiv]
+  {p(\genDJ{x})}
+  {\axkey{\ddiamond{\pupdate{\umod{x}{\genDJ{x}}}}{p(x)}}}
+}
+{}%{$\genDJ{x}$ free for $x$ in $p(x)$}
+\cinferenceRuleStore[evolved|$\didia{'}$]{evolve}
+{\linferenceRule[equiv]
+  {\lexists{t{\geq}0}{\ddiamond{\pupdate{\pumod{x}{\solf(t)}}}{p(x)}}\hspace{1cm}}
+  {\axkey{\ddiamond{\pevolve{\D{x}=\genDE{x}}}{p(x)}}}
+}{\m{\D{\solf}(t)=\genDE{\solf}}}%{$t$ is a fresh variable, no x' in p(x) or q(x) and~$\solf$ is the solution of the differential equations with constant symbol~$x$ as symbolic initial values.}
+\cinferenceRuleStore[evolveind|$\didia{'}$]{evolve}
+{\linferenceRule[equiv]
+  {\lexists{t{\geq}0}{\big((\lforall{0{\leq}s{\leq}t}{q(\solf(s))}) \land 
+  \ddiamond{\pupdate{\pumod{x}{\solf(t)}}}{p(x)}\big)}}
+  {\axkey{\ddiamond{\pevolvein{\D{x}=\genDE{x}}{q(x)}}{p(x)}}}
+}{\m{\D{\solf}(t)=\genDE{\solf}}}%{$t$ is a fresh variable, no x' in p(x) or q(x) and~$\solf$ is the solution of the differential equations with constant symbol~$x$ as symbolic initial values.}
+\cinferenceRuleStore[testd|$\didia{?}$]{test}
+{\linferenceRule[equiv]
+  {\ivr \land \ausfml}
+  {\axkey{\ddiamond{\ptest{\ivr}}{\ausfml}}}
+}{}
+\cinferenceRuleStore[choiced|$\didia{\cup}$]{axiom of nondeterministic choice}
+{\linferenceRule[equiv]
+  {\ddiamond{\ausprg}{\ausfml} \lor \ddiamond{\busprg}{\ausfml}}
+  {\axkey{\ddiamond{\pchoice{\ausprg}{\busprg}}{\ausfml}}}
+}{}
+\cinferenceRuleStore[composed|$\didia{{;}}$]{composition}
+{\linferenceRule[equiv]
+  {\ddiamond{\ausprg}{\ddiamond{\busprg}{\ausfml}}}
+  {\axkey{\ddiamond{\ausprg;\busprg}{\ausfml}}}
+}{}
+\cinferenceRuleStore[iterated|$\didia{{}^*}$]{iteration/repeat unwind pre-fixpoint, even fixpoint}
+{\linferenceRule[equiv]
+  {\ausfml \lor \ddiamond{\ausprg}{\ddiamond{\prepeat{\ausprg}}{\ausfml}}}
+  {\axkey{\ddiamond{\prepeat{\ausprg}}{\ausfml}}}
+}{}
+\cinferenceRuleStore[duald|$\didia{{^d}}$]{dual}
+{\linferenceRule[equiv]
+  {\lnot\ddiamond{\ausprg}{\lnot\ausfml}}
+  {\axkey{\ddiamond{\pdual{\ausprg}}{\ausfml}}}
+}{}
+\cinferenceRuleStore[dualb|$\dibox{{^d}}$]{dual}
+{\linferenceRule[equiv]
+  {\lnot\dbox{\ausprg}{\lnot\ausfml}}
+  {\axkey{\dbox{\pdual{\ausprg}}{\ausfml}}}
+}{}
+\cinferenceRuleStore[FP|FP]{iteration is least fixpoint / reflexive transitive closure RTC, equivalent to invind in the presence of R}
+{\linferenceRule[formula]
+  {\ausfml \lor \ddiamond{\ausprg}{\busfml} \limply \busfml}
+  {\ddiamond{\prepeat{\ausprg}}{\ausfml} \limply \busfml}
+}{}
+\cinferenceRuleStore[invindg|ind]{inductive invariant for games}
+{\linferenceRule[formula]
+  {\ausfml\limply\dbox{\ausprg}{\ausfml}}
+  {\ausfml\limply\dbox{\prepeat{\ausprg}}{\ausfml}}
+}{}%{derived from \irref{FP} and same as \irref{invind} modulo notation}
+
+\dinferenceRuleStore[dchoiced|$\didia{{\cap}}$]{Demon's choice}
+{
+\axkey{\ddiamond{\dchoice{\ausprg}{\busprg}}{\ausfml}} \lbisubjunct \ddiamond{\ausprg}{\ausfml} \land \ddiamond{\busprg}{\ausfml}
+}{}
+\dinferenceRuleStore[dchoiceb|$\dibox{{\cap}}$]{Demon's choice}
+{
+\axkey{\dbox{\dchoice{\ausprg}{\busprg}}{\ausfml}} \lbisubjunct \dbox{\ausprg}{\ausfml} \lor \dbox{\busprg}{\ausfml}
+}{}
+\dinferenceRuleStore[diterateb|$\dibox{\drepeat{}}$]{Demon's repetition}
+{\linferenceRule[equiv]
+  {\ausfml \lor \dbox{\ausprg}{\dbox{\drepeat{\ausprg}}{\ausfml}}}
+  {\axkey{\dbox{\drepeat{\ausprg}}{\ausfml}}}
+}{}
+\dinferenceRuleStore[diterated|$\didia{\drepeat{}}$]{Demon's repetition}
+{\linferenceRule[equiv]
+  {\ausfml \land \ddiamond{\ausprg}{\ddiamond{\drepeat{\ausprg}}}{\ausfml}}
+  {\axkey{\ddiamond{\drepeat{\ausprg}}{\ausfml}}}
+}{}
+\dinferenceRuleStore[dinvindg|ind$\drepeat{}$]{inductive invariant for games}
+{\linferenceRule[formula]
+  {\ausfml\limply\ddiamond{\ausprg}{\ausfml}}
+  {\ausfml\limply\ddiamond{\drepeat{\ausprg}}{\ausfml}}
+}{}
+\dinferenceRuleStore[dFP|FP$\drepeat{}$]{dual iteration is least fixpoint in Demon's winning strategy}
+{\linferenceRule[formula]
+  {\ausfml \lor \dbox{\ausprg}{\busfml} \limply \busfml}
+  {\dbox{\drepeat{\ausprg}}{\ausfml} \limply \busfml}
+}{}
+
+
+
+
+\cinferenceRuleStore[US|US]{uniform substitution}
+{\linferenceRule[formula]
+  {\phi}
+  {\applyusubst{\sigma}{\phi}}
+}{}%\internal{assumed part of the Hilbert base calculus, free 
+
+\cinferenceRuleStore[linequs|$\exists$lin]{linear equation uniform substitution}
+{\linferenceRule[impl]
+  {b\neq0}
+  {\big(\lexists{x}{(b\cdot x+c=0 \land q(x))}
+  \lbisubjunct {q(-c/b)}\big)}
+}{}
+
+
+%% Exercises
+\dinferenceRuleStore[FA|FA]{First arrival}
+{\ddiamond{\prepeat{\ausprg}}{\ausfml} \limply \ausfml \lor \ddiamond{\prepeat{\ausprg}}{(\lnot\ausfml\land\ddiamond{\ausprg}{\ausfml})}
+}{}
+\dinferenceRuleStore[Mor|M]{monotonicity axiom}
+{\ddiamond{\ausprg}{(\ausfml\lor\busfml)}
+\lbisubjunct
+\ddiamond{\ausprg}{\ausfml} \lor \ddiamond{\ausprg}{\busfml}
+}{}
+\dinferenceRuleStore[VK|VK]{vacuous possible $\dbox{}{}$}
+{\linferenceRule[impl]
+  {p}
+  {(\dbox{\ausprg}{\ltrue}{\limply}\dbox{\ausprg}{p})}
+  \qquad
+}{\m{\freevars{p}\cap \boundvars{\ausprg}=\emptyset}}%{no free variable of $p$ is bound by $\ausprg$}
+\dinferenceRuleStore[R|R]{Regular}
+{\linferenceRule[formula]
+  {\ausfml_1\land\ausfml_2\limply\busfml}
+  {\dbox{\ausprg}{\ausfml_1} \land \dbox{\ausprg}{\ausfml_2} \limply \dbox{\ausprg}{\busfml}}
+}{}
+
+
