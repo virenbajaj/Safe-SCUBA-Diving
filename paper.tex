@@ -48,6 +48,9 @@
 \usepackage{tablefootnote}
 \usepackage{logic}
 \usepackage{prettyref}
+\usepackage{tikz,lipsum,lmodern}
+\usepackage[most]{tcolorbox}
+
 
 
 \newcommand{\varheart}{hr}
@@ -214,6 +217,7 @@ To deal with these two issues, we present a hybrid systems model of a SCUBA divi
 % [?] suggests that the relationship between heart rate and oxygen consumption could be determined using machine learning techniques. This paper considers a first-principles model, but notice ? demonstrate how KeYmaera X is able to use first-principles models to inform and provide safety guarantees for machine learning algorithms.
 
 \section{The Model}
+
 The primary contribution of this paper is a model (Fig 1) of a hybrid dynamical system consisting of a scuba diver and depth and heart rate sensors. The model captures the behavior of the diver, and dynamics of depth and heart rate, which is used to show that the diver does not: 1) run out of air before surfacing and 2) completes a safety stop to avoid decompression sickness. These safety critical properties are proven for all initial configurations of the model parameters, which are constrained to physiologically and mathematically realistic domains.
 
 This section explains some of our important 
@@ -238,19 +242,17 @@ This specification can be implemented in many different ways, e.g., a dive compu
 Each component of the behavior program contains tests which indicate conditions that must be true if the diver chooses to take the associated action. For example, in \textit{descend} the dive computer will check three conditions, two of which are discussed below and one is discussed in sec [safety stop]
 
 \begin{enumerate}
-\item 
-\begin{align*}
-\tApprox &>\tau \varheart_{\text{max}} C + \tau \varheart_{\text{max}}\frac{-d - C \iitimes \vDesc}{\vAsc} \\ &+ \tau \varheart_{\text{max}}(stopDuration - stoppedTime);
-\end{align*}
+    \item 
+        \begin{align*}
+            \tApprox &>\tau \varheart_{\text{max}} C + \tau \varheart_{\text{max}}\frac{-d - C \iitimes \vDesc}{\vAsc} \\ &+ \tau \varheart_{\text{max}}(stopDuration - stoppedTime);
+        \end{align*}
 which states that the tank contains enough oxygen to allow the diver
 1) to descend for $c \le C$ seconds
 2) ascend to the surface from their new depth ($d = d_0 + c\iitimes\vDesc$) and,
 3) to stop for the remaining time of the stopDuration.
 
-\item 
-$$
-?\varheart_{min} \le \varheart_{ss} \le \varheart_{max};
-$$
+    \item 
+        $$?\varheart_{min} \le \varheart_{ss} \le \varheart_{max};$$
 which states that the diver's steady state heart rate (or equivalently, level of exertion) is physically realizable. 
 % i.e., the diver will not approach an impossibly low or impossibly high heart rate.
 Notice that our model allows the diver to directly choose their vertical velocity,
@@ -269,6 +271,18 @@ Another crucial aspect of our model is that none of these tests directly mention
 % \subsubsection{Motion}
 
 % \subsubsection{Safety Stop}
+\subsection{Ground truth update}
+The basic model relies on a very poor approximation of oxygen consumed between each control step.
+Some over-approximation is necessary because we can't know, for certain, how the diver's heart rate
+changes in-between sensor measurements. To compensate, we modify the basic model in a way that allows
+the diver to occasionally manually update the tank approximation with ground truth about the amount of oxygen in the tank.
+
+The \textit{groundTruthUpdate} program models a choice $\cup$, made by the diver at each control step, between continuing with the current tank approximation ($\tApprox := \tApprox$) or updating the tank's approximation with the ground truth
+($\tApprox := t$). The former program is equivalent to the empty program, i.e., a no-op.
+
+A concrete implementation of this update is, e.g., the diver looking at an analog read-out of the oxygen remaining in their tank
+and inputting this value into their dive computer.
+
 
 \subsection{Safety Stop}
 To be complete our model must account for a decompression stop that divers often need to make to avoid decompression sickness. Our model allows the diver to stop for a pre-specified duration (\textit{stopDuration}) at a pre-specified depth (\textit{stopDepth}  based on the dive plan \footnote[2]){The stop depth is always prescribed to be between 15-20 feet.}.
@@ -292,14 +306,13 @@ The diver is only allowed to ascend once the safety stop is complete ($\stoppedT
 reached the stop depth ($d > \stopDepth$).
 
 
-\subsection{Ground truth update}
 
 \subsection{Initial configuration and Conclusion}
-
-\section{Safety Theorem}
+The \textit{init} formula describes the system's initial configuration,
+including bounds on system parameters and a description of safe starting configurations for other variables.
 
 \begin{table*}
-  \caption{Frequency of Special Characters}
+  \caption{Model Variables and Constraints}
   \label{tab:vars}
   \begin{tabular}{lll}
     \toprule
@@ -320,6 +333,9 @@ reached the stop depth ($d > \stopDepth$).
   \bottomrule
 \end{tabular}
 \end{table*}
+
+\section{Safety Theorem}
+
 
 \section{Citations and Bibliographies}
 
@@ -352,8 +368,8 @@ Hybrid programs, introduced by ???, are a programming language for hybrid system
     Program Statement & Meaning \\
     \midrule
     $\alpha;\beta$ & Sequentially composes $\beta$ after $\alpha$. \\
-    $\alpha \cup \beta$ & Executes either $\alpha$ or $\beta$ nondeterministically.\\
-    $\alpha^*$ & Repeats $\alpha$ zero or more times nondeterministically.\\
+    $\alpha \cup \beta$ & Executes either $\alpha$ or $\beta$ \\ & nondeterministically.\\
+    $\alpha^*$ & Repeats $\alpha$ zero or more times \\& nondeterministically.\\
     $x := \theta$ & Evaluates term $\theta$ and assigns result to $x$. \\
     $x := *$ & Assigns an arbitrary real value to $x$. \\
     $\{x_1'=\theta_1,...,x_n'=\theta_n \& F\}$ & Continuous evolution\footnotemark. \\
@@ -405,5 +421,99 @@ Reachability properties for hybrid programs are expressible as \dDL formulas. ..
 \section{KeYmaera X}
 
 is an axiomatic theorem prover for dL first introduced by ?. KeYmaera X provides a small axiomatic core, ensuring that results obtained from the prover can be trusted. In addition to a small core, KeYmaera X provides a proof programming language called Bellerophon for establishing verification results about hybrid programs ?.
+
+
+
+\section{ Model }
+\begin{align*}
+\underbrace{t \ge 0 \land \dotsm \vphantom{\dibox{}}}_{\text{precondition}} & 
+\limply 
+\dibox{\prepeat{ \{ ctrl;
+\{ \underbrace{\textit{ascend} \cup \textit{stay} \cup \textit{descend}}_{\text{diver's behavioral model}} \}; plant 
+\}
+}}\underbrace{\textit{tank} \ge 0}_{\text{postcondition}}
+\label{eq:carmodel}
+\end{align*}
+
+\begin{tcolorbox}[enhanced,
+  colback=blue!5!white,colframe=blue!75!black,colbacktitle=red!80!black,
+  title=program,fonttitle=\bfseries,
+  boxed title style={size=small,colframe=red!50!black}, boxsep=.5mm ]
+ 
+    \begin{tcolorbox}[enhanced,attach boxed title to top center={yshift=-3mm,yshifttext=-1mm},
+      colback=blue!5!white,colframe=blue!75!black,colbacktitle=red!80!black,
+      title=ctrl,fonttitle=\bfseries,
+      boxed title style={size=small,colframe=red!50!black}, boxsep=.1mm ]
+      $\{\texttt{NOP} \cup \humod{t_{worst}}{t}\}$
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[enhanced,attach boxed title to top center={yshift=-3mm,yshifttext=-1mm},
+      colback=blue!5!white,colframe=blue!75!black,colbacktitle=red!80!black,
+      title=Behavior,fonttitle=\bfseries,
+      boxed title style={size=small,colframe=red!50!black}, boxsep=.1mm ]
+  
+  
+          \begin{tcolorbox}[enhanced,
+          colback=blue!5!white,colframe=blue!75!black,colbacktitle=red!80!black,
+          title=descend,fonttitle=\bfseries,boxed title style={size=small,colframe=red!50!black}, boxsep= .5mm ]
+          $
+          \{?t_{worst} \ge \tau*hr_{max} * \epsilon
+                + \tau hr_{max}  \frac{-d - v_{desc}\epsilon}{v_{asc}};\\
+                &\hspace{1.5cm}\humod{a}{*}; \humod{v}{0}\} 
+            $
+        \end{tcolorbox}
+        \begin{tcolorbox}[enhanced,
+          colback=blue!5!white,colframe=blue!75!black,colbacktitle=red!80!black,
+          title=stay,fonttitle=\bfseries,boxed title style={size=small,colframe=red!50!black}, boxsep= .5mm ]
+          $
+          \{?t_{worst} \ge \tau hr_{max} \epsilon
+                + \tau hr_{max}  \frac{-d}{v_{asc}};\\
+                &\hspace{1.5cm}\humod{a}{*};\humod{v}{0}\}
+            $
+        \end{tcolorbox}
+        \begin{tcolorbox}[enhanced,
+          colback=blue!5!white,colframe=blue!75!black,colbacktitle=red!80!black,
+          title=ascend,fonttitle=\bfseries,boxed title style={size=small,colframe=red!50!black}, boxsep= .5mm ]
+          $$
+          \{\humod{a}{*};\humod{v}{v_{asc}} \} 
+            $$
+        \end{tcolorbox}
+    \end{tcolorbox}
+    \begin{tcolorbox}[enhanced,attach boxed title to top center={yshift=-3mm,yshifttext=-1mm},
+      colback=blue!5!white,colframe=blue!75!black,colbacktitle=red!80!black,
+      title=plant,fonttitle=\bfseries,
+      boxed title style={size=small,colframe=red!50!black}, boxsep=.1mm ]
+     \begin{align*}
+     \humod{c}{0};
+          &\hspace{1.1cm}\{x' = b(a-x),\\
+          &\ \hspace{1.1cm}t' = -\tau x,\\
+          &\ \hspace{1.1cm}d' = v,\\
+          &\ \hspace{1.1cm}c' = 1 \\
+          &\ \hspace{1.1cm}\text{\& } d \ge 0 ~\land~c \le \epsilon\} \\
+          &\hspace{1.1cm}\{\humod{t_{worst}}{t_{worst} - \tau hr_{max} c}\}
+     \end{align*}
+     
+    \end{tcolorbox}
+    
+\end{tcolorbox}
+
+
+\begin{align*}
+\bm{ctrl} &\equiv \{\texttt{NOP} \cup \humod{t_{worst}}{t}\} \\\\
+\bm{ascend} &\equiv \{\humod{a}{*};\humod{v}{v_{asc}} \} \\\\
+\bm{stay} &\equiv \{?t_{worst} \ge \tau hr_{max} \epsilon
+        + \tau hr_{max}  \frac{-d}{v_{asc}};\\
+        &\hspace{1.5cm}\humod{a}{*};\humod{v}{0}\} \\\\
+\bm{descend} &\equiv \{?t_{worst} \ge \tau*hr_{max} * \epsilon
+        + \tau hr_{max}  \frac{-d - v_{desc}\epsilon}{v_{asc}};\\
+        &\hspace{1.5cm}\humod{a}{*}; \humod{v}{0}\} \\\\
+\bm{plant} &\equiv  \humod{c}{0}; \\
+          &\hspace{1.1cm}\{x' = b(a-x),\\
+          &\ \hspace{1.1cm}t' = -\tau x,\\
+          &\ \hspace{1.1cm}d' = v,\\
+          &\ \hspace{1.1cm}c' = 1 \\
+          &\ \hspace{1.1cm}\text{\& } d \ge 0 ~\land~c \le \epsilon\} \\
+          &\hspace{1.1cm}\{\humod{t_{worst}}{t_{worst} - \tau hr_{max} c}\} 
+\end{align*} 
  
 \end{document}
